@@ -25918,3 +25918,32 @@ local CP26toPuncak_str = [[
 755.58,2192.45,3942.15
 755.58,2192.45,3942.15
 ]]
+
+routes = {
+    {"CP1->CP2", parseRoute(env.CP1to2_str)},
+    {"CP2->CP3", parseRoute(env.CP2to3_str)},
+    {"CP3->CP4", parseRoute(env.CP3to4_str)},
+    {"CP4->CP5", parseRoute(env.CP4to5_str)},
+    {"CP5->CP6", parseRoute(env.CP5to6_str)},
+    {"CP6->CP7", parseRoute(env.CP6to7_str)},
+    {"CP7->CP8", parseRoute(env.CP7to8_str)},
+    {"CP8->CP9", parseRoute(env.CP8to9_str)},
+    {"CP9->CP10", parseRoute(env.CP9to10_str)},
+    {"CP10->CP11", parseRoute(env.CP10to11_str)},
+    {"CP11->CP12", parseRoute(env.CP11to12_str)},
+    {"CP12->CP13", parseRoute(env.CP12to13_str)},
+    {"CP13->CP14", parseRoute(env.CP13to14_str)},
+    {"CP14->CP15", parseRoute(env.CP14to15_str)},
+    {"CP15->CP16", parseRoute(env.CP15to16_str)},
+    {"CP16->CP17", parseRoute(env.CP16to17_str)},
+    {"CP17->CP18", parseRoute(env.CP17to18_str)},
+    {"CP18->CP19", parseRoute(env.CP18to19_str)},
+    {"CP19->CP20", parseRoute(env.CP19to20_str)},
+    {"CP20->CP21", parseRoute(env.CP20to21_str)},
+    {"CP21->CP22", parseRoute(env.CP21to22_str)},
+    {"CP22->CP23", parseRoute(env.CP22to23_str)},
+    {"CP23->CP24", parseRoute(env.CP23to24_str)},
+    {"CP24->CP25", parseRoute(env.CP24to25_str)},
+    {"CP25->CP26", parseRoute(env.CP25to26_str)},
+    {"CP26->Puncak", parseRoute(env.CP26toPuncak_str)},
+}
