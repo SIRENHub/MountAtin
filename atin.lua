@@ -1,3 +1,22 @@
+-- WataX Hub 
+
+local Players = game:GetService("Players")
+local player = Players.LocalPlayer
+local hrp = player.Character and player.Character:WaitForChild("HumanoidRootPart")
+
+local delayTime = 0.04
+local isRunning = false
+local routes = {}
+
+
+local function parseRoute(str)
+    local t = {}
+    for x,y,z in str:gmatch("([%-%d%.]+),([%-%d%.]+),([%-%d%.]+)") do
+        table.insert(t, Vector3.new(tonumber(x),tonumber(y),tonumber(z)))
+    end
+    return t
+end
+
 local CP1to2_str = [[
 16.63,55.17,-1082.47
 16.65,55.17,-1081.94
