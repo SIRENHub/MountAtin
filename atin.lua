@@ -17,6 +17,8 @@ local function parseRoute(str)
     return t
 end
 
+-- ==============================
+-- isi koordinat di sini
 local CP1to2_str = [[
 16.63,55.17,-1082.47
 16.65,55.17,-1081.94
@@ -25937,7 +25939,9 @@ local CP26toPuncak_str = [[
 755.58,2192.45,3942.15
 755.58,2192.45,3942.15
 ]]
+-- ==============================
 
+-- daftar semua route
 routes = {
     {"CP1->CP2", parseRoute(CP1to2_str)},
     {"CP2->CP3", parseRoute(CP2to3_str)},
@@ -25966,3 +25970,175 @@ routes = {
     {"CP25->CP26", parseRoute(CP25to26_str)},
     {"CP26->puncak", parseRoute(CP26toPuncak_str)},
 }
+
+
+local function getNearestRoute()
+    local nearestIdx, dist = 1, math.huge
+    if hrp then
+        local pos = hrp.Position
+        for i,data in ipairs(routes) do
+            for _,point in ipairs(data[2]) do
+                local d = (point - pos).Magnitude
+                if d < dist then
+                    dist = d
+                    nearestIdx = i
+                end
+            end
+        end
+    end
+    return nearestIdx
+end
+
+
+local function runRouteOnce()
+    if #routes == 0 then return end
+    isRunning = true
+    local idx = getNearestRoute()
+    print("Start CP:", routes[idx][1])
+    local route = routes[idx][2]
+    local startIdx, dist = 1, math.huge
+    if hrp then
+        local pos = hrp.Position
+        for i,point in ipairs(route) do
+            local d = (point - pos).Magnitude
+            if d < dist then
+                dist = d
+                startIdx = i
+            end
+        end
+    end
+    spawn(function()
+        for i = startIdx, #route do
+            if not isRunning then break end
+            if hrp then
+                hrp.CFrame = CFrame.new(route[i])
+            end
+            task.wait(delayTime)
+        end
+    end)
+end
+
+
+local function runAllRoutes()
+    if #routes == 0 then return end
+    isRunning = true
+    local idx = getNearestRoute()
+    print("Start All dari:", routes[idx][1])
+    for r = idx, #routes do
+        local route = routes[r][2]
+        local startIdx = 1
+        if r == idx and hrp then
+            local pos = hrp.Position
+            local dist = math.huge
+            for i,point in ipairs(route) do
+                local d = (point - pos).Magnitude
+                if d < dist then
+                    dist = d
+                    startIdx = i
+                end
+            end
+        end
+        for i = startIdx, #route do
+            if not isRunning then return end
+            if hrp then
+                hrp.CFrame = CFrame.new(route[i])
+            end
+            task.wait(delayTime)
+        end
+    end
+end
+
+-- stop
+local function stopRoute()
+    isRunning = false
+    print("Stop ditekan")
+end
+
+-- =========================
+-- GUI
+local screenGui = Instance.new("ScreenGui",player:WaitForChild("PlayerGui"))
+screenGui.ResetOnSpawn = false
+
+local frame = Instance.new("Frame",screenGui)
+frame.Size = UDim2.new(0,240,0,160)
+frame.Position = UDim2.new(0.5,-120,0.5,-80)
+frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
+frame.Active = true
+frame.Draggable = true
+
+local title = Instance.new("TextLabel",frame)
+title.Size = UDim2.new(1,0,0,30)
+title.Text = "WataX Menu"
+title.BackgroundColor3 = Color3.fromRGB(60,60,60)
+title.TextColor3 = Color3.fromRGB(255,255,255)
+title.Font = Enum.Font.SourceSansBold
+title.TextScaled = true
+
+
+local closeBtn = Instance.new("TextButton",frame)
+closeBtn.Size = UDim2.new(0,30,0,30)
+closeBtn.Position = UDim2.new(0,0,0,0)
+closeBtn.Text = "X"
+closeBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
+closeBtn.MouseButton1Click:Connect(function()
+    screenGui:Destroy()
+end)
+
+
+local miniBtn = Instance.new("TextButton",frame)
+miniBtn.Size = UDim2.new(0,30,0,30)
+miniBtn.Position = UDim2.new(1,-30,0,0)
+miniBtn.Text = "_"
+miniBtn.BackgroundColor3 = Color3.fromRGB(80,80,200)
+miniBtn.TextColor3 = Color3.fromRGB(255,255,255)
+
+
+local bubbleBtn = Instance.new("TextButton",screenGui)
+bubbleBtn.Size = UDim2.new(0,60,0,40)
+bubbleBtn.Position = UDim2.new(0,20,0.7,0)
+bubbleBtn.Text = "WataX"
+bubbleBtn.BackgroundColor3 = Color3.fromRGB(0,120,200)
+bubbleBtn.TextColor3 = Color3.fromRGB(255,255,255)
+bubbleBtn.Font = Enum.Font.SourceSansBold
+bubbleBtn.TextScaled = true
+bubbleBtn.Visible = false
+bubbleBtn.Active = true
+bubbleBtn.Draggable = true
+
+miniBtn.MouseButton1Click:Connect(function()
+    frame.Visible = false
+    bubbleBtn.Visible = true
+end)
+
+bubbleBtn.MouseButton1Click:Connect(function()
+    frame.Visible = true
+    bubbleBtn.Visible = false
+end)
+
+
+local startCP = Instance.new("TextButton",frame)
+startCP.Size = UDim2.new(0.5,-5,0,40)
+startCP.Position = UDim2.new(0,5,0,40)
+startCP.Text = "Start CP"
+startCP.BackgroundColor3 = Color3.fromRGB(50,200,50)
+startCP.TextColor3 = Color3.fromRGB(255,255,255)
+startCP.MouseButton1Click:Connect(runRouteOnce)
+
+
+local stopBtn = Instance.new("TextButton",frame)
+stopBtn.Size = UDim2.new(0.5,-5,0,40)
+stopBtn.Position = UDim2.new(0.5,0,0,40)
+stopBtn.Text = "Stop"
+stopBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
+stopBtn.TextColor3 = Color3.fromRGB(255,255,255)
+stopBtn.MouseButton1Click:Connect(stopRoute)
+
+
+local startAll = Instance.new("TextButton",frame)
+startAll.Size = UDim2.new(1,-10,0,40)
+startAll.Position = UDim2.new(0,5,0,90)
+startAll.Text = "Start To End"
+startAll.BackgroundColor3 = Color3.fromRGB(50,100,200)
+startAll.TextColor3 = Color3.fromRGB(255,255,255)
+startAll.MouseButton1Click:Connect(runAllRoutes)
