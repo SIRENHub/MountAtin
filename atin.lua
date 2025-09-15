@@ -3,10 +3,9 @@
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local hrp = player.Character and player.Character:WaitForChild("HumanoidRootPart")
-
-local delayTime = 0.04
 local isRunning = false
 local routes = {}
+local delayTime = 0.4 -- default, nanti diubah lewat slider
 
 
 local function parseRoute(str)
@@ -25972,6 +25971,9 @@ routes = {
 }
 
 
+-- =========================
+-- Fungsi
+-- =========================
 local function getNearestRoute()
     local nearestIdx, dist = 1, math.huge
     if hrp then
@@ -25988,7 +25990,6 @@ local function getNearestRoute()
     end
     return nearestIdx
 end
-
 
 local function runRouteOnce()
     if #routes == 0 then return end
@@ -26007,7 +26008,7 @@ local function runRouteOnce()
             end
         end
     end
-    spawn(function()
+    task.spawn(function()
         for i = startIdx, #route do
             if not isRunning then break end
             if hrp then
@@ -26017,7 +26018,6 @@ local function runRouteOnce()
         end
     end)
 end
-
 
 local function runAllRoutes()
     if #routes == 0 then return end
@@ -26048,97 +26048,71 @@ local function runAllRoutes()
     end
 end
 
--- stop
 local function stopRoute()
     isRunning = false
     print("Stop ditekan")
 end
 
 -- =========================
--- GUI
-local screenGui = Instance.new("ScreenGui",player:WaitForChild("PlayerGui"))
-screenGui.ResetOnSpawn = false
+-- GUI pakai 3itx-UI-Lib
+-- =========================
+local lib = loadstring(game:HttpGet("https://raw.githubusercontent.com/Just3itx/3itx-UI-LIB/refs/heads/main/Lib"))() 
+local FlagsManager = loadstring(game:HttpGet("https://raw.githubusercontent.com/Just3itx/3itx-UI-LIB/refs/heads/main/ConfigManager"))()
 
-local frame = Instance.new("Frame",screenGui)
-frame.Size = UDim2.new(0,240,0,160)
-frame.Position = UDim2.new(0.5,-120,0.5,-80)
-frame.BackgroundColor3 = Color3.fromRGB(30,30,30)
-frame.Active = true
-frame.Draggable = true
+local main = lib:Load({
+    Title = 'SIREN | Auto Walk',
+    ToggleButton = "RBXID or GetCustomasset",
+	BindGui = Enum.KeyCode.RightControl,
+})
 
-local title = Instance.new("TextLabel",frame)
-title.Size = UDim2.new(1,0,0,30)
-title.Text = "WataX Menu"
-title.BackgroundColor3 = Color3.fromRGB(60,60,60)
-title.TextColor3 = Color3.fromRGB(255,255,255)
-title.Font = Enum.Font.SourceSansBold
-title.TextScaled = true
+local Main = main:AddTab("Main")
+main:SelectTab()
 
+local MainSection = Main:AddSection({Title = "Mount Atin", Description = "Auto Walk"})
+MainSection:AddParagraph({Title = "Mount Atin",Description = "Auto Walk System"})
 
-local closeBtn = Instance.new("TextButton",frame)
-closeBtn.Size = UDim2.new(0,30,0,30)
-closeBtn.Position = UDim2.new(0,0,0,0)
-closeBtn.Text = "X"
-closeBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
-closeBtn.TextColor3 = Color3.fromRGB(255,255,255)
-closeBtn.MouseButton1Click:Connect(function()
-    screenGui:Destroy()
+-- Toggle: Start To End
+MainSection:AddToggle("ToSummit", {
+    Title = "To Summit (Start To End)",
+    Default = false,
+    Callback = function(isEnabled)
+        if isEnabled then
+            runAllRoutes()
+        else
+            stopRoute()
+        end
+    end,
+})
+
+-- Toggle: Nearest CP
+MainSection:AddToggle("NearestCP", {
+    Title = "To Nearest CP",
+    Default = false,
+    Callback = function(isEnabled)
+        if isEnabled then
+            runRouteOnce()
+        else
+            stopRoute()
+        end
+    end,
+})
+
+-- Slider: Speed
+MainSection:AddSlider("Speed", {
+    Title = "Speed Walk",
+    Default = 10,
+    Min = 1,
+    Max = 100,
+    Increment = 1,
+    Callback = function(value)
+        delayTime = 1 / value  -- makin besar slider, makin cepat jalan
+        print("DelayTime set:", delayTime)
+    end,
+})
+
+-- Button stop manual
+MainSection:AddButton("Stop Route", function()
+    stopRoute()
 end)
 
-
-local miniBtn = Instance.new("TextButton",frame)
-miniBtn.Size = UDim2.new(0,30,0,30)
-miniBtn.Position = UDim2.new(1,-30,0,0)
-miniBtn.Text = "_"
-miniBtn.BackgroundColor3 = Color3.fromRGB(80,80,200)
-miniBtn.TextColor3 = Color3.fromRGB(255,255,255)
-
-
-local bubbleBtn = Instance.new("TextButton",screenGui)
-bubbleBtn.Size = UDim2.new(0,60,0,40)
-bubbleBtn.Position = UDim2.new(0,20,0.7,0)
-bubbleBtn.Text = "WataX"
-bubbleBtn.BackgroundColor3 = Color3.fromRGB(0,120,200)
-bubbleBtn.TextColor3 = Color3.fromRGB(255,255,255)
-bubbleBtn.Font = Enum.Font.SourceSansBold
-bubbleBtn.TextScaled = true
-bubbleBtn.Visible = false
-bubbleBtn.Active = true
-bubbleBtn.Draggable = true
-
-miniBtn.MouseButton1Click:Connect(function()
-    frame.Visible = false
-    bubbleBtn.Visible = true
-end)
-
-bubbleBtn.MouseButton1Click:Connect(function()
-    frame.Visible = true
-    bubbleBtn.Visible = false
-end)
-
-
-local startCP = Instance.new("TextButton",frame)
-startCP.Size = UDim2.new(0.5,-5,0,40)
-startCP.Position = UDim2.new(0,5,0,40)
-startCP.Text = "Start CP"
-startCP.BackgroundColor3 = Color3.fromRGB(50,200,50)
-startCP.TextColor3 = Color3.fromRGB(255,255,255)
-startCP.MouseButton1Click:Connect(runRouteOnce)
-
-
-local stopBtn = Instance.new("TextButton",frame)
-stopBtn.Size = UDim2.new(0.5,-5,0,40)
-stopBtn.Position = UDim2.new(0.5,0,0,40)
-stopBtn.Text = "Stop"
-stopBtn.BackgroundColor3 = Color3.fromRGB(200,50,50)
-stopBtn.TextColor3 = Color3.fromRGB(255,255,255)
-stopBtn.MouseButton1Click:Connect(stopRoute)
-
-
-local startAll = Instance.new("TextButton",frame)
-startAll.Size = UDim2.new(1,-10,0,40)
-startAll.Position = UDim2.new(0,5,0,90)
-startAll.Text = "Start To End"
-startAll.BackgroundColor3 = Color3.fromRGB(50,100,200)
-startAll.TextColor3 = Color3.fromRGB(255,255,255)
-startAll.MouseButton1Click:Connect(runAllRoutes)
+lib:Notification('Hello', 'Thanks for using 3itx-UI-Lib', 3)
